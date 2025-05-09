@@ -100,39 +100,58 @@ Example VSCode `launch.json` Configuration (VSCode `launch.json` 配置示例):
     // "env": { "PYTHONPATH": "${workspaceFolder}/src" }
 }
 """
-if __name__ == "__main__":
+def main():
     import sys
+    import os
     # 1. Check for the minimum number of arguments (检查基本参数数量)
     if len(sys.argv) < 2: # At least the script name and target module path are required (至少需要脚本名和目标模块路径)
-        print(f"Usage: python {sys.argv[0]} <path_to_your_module.py> [optional_args_for_module_main...]", file=sys.stderr)
-        print(f"用法: python {sys.argv[0]} <你的模块.py路径> [可选的模块_main函数参数...]", file=sys.stderr)
+        script_name = sys.argv[0] # Get script name for usage message
+        print(f"Usage: python {script_name} <path_to_your_module.py> [optional_args_for_module_main...]", file=sys.stderr)
+        print(f"用法: python {script_name} <你的模块.py路径> [可选的模块_main函数参数...]", file=sys.stderr)
         sys.exit(1)
 
-    # sys.argv[0] is the run_main.py script itself (sys.argv[0] 是 run_main.py 脚本自身)
-    # sys.argv[1] is the file path of the target module (dst_fn) (sys.argv[1] 是目标模块的文件路径 (dst_fn))
-    # sys.argv[2:] are the arguments to be passed to the target module's _main function (sys.argv[2:] 是希望传递给目标模块 _main 函数的参数)
+    # sys.argv[0] is the command/script name
+    # sys.argv[1] is the file path of the target module (dst_fn)
+    # sys.argv[2:] are the arguments to be passed to the target module's _main function
+    target_file_arg = sys.argv[1]
+    args_for_main = sys.argv[2:] # Arguments for the target _main
+
+    # 2. Validate target file
+    if not target_file_arg.endswith(".py"):
+        print(f"Error: Target file '{target_file_arg}' does not appear to be a Python file (.py). Please provide a .py file.", file=sys.stderr)
+        print(f"错误: 目标文件 '{target_file_arg}' 看起来不是一个 Python 文件 (.py)。请输入一个 .py 文件。", file=sys.stderr)
+        sys.exit(1)
+
+    project_root = os.path.normpath(os.getcwd())
+    target_abs_path = os.path.normpath(os.path.abspath(target_file_arg))
+
+    try:
+        module_rel_path = os.path.relpath(target_abs_path, project_root)
+    except ValueError: # Handles cases like different drives on Windows
+        print(f"Error: Target file '{target_abs_path}' is outside the project directory '{project_root}'.", file=sys.stderr)
+        print(f"错误: 目标文件 '{target_abs_path}' 不在项目目录 '{project_root}' 内。", file=sys.stderr)
+        sys.exit(1)
+
+    if module_rel_path.startswith(os.pardir) or os.path.isabs(module_rel_path):
+        # os.path.isabs() check is a safeguard, relpath should not return abs path if start is provided
+        print(f"Error: Target file '{target_abs_path}' is outside the project directory '{project_root}'.", file=sys.stderr)
+        print(f"错误: 目标文件 '{target_abs_path}' 不在项目目录 '{project_root}' 内。", file=sys.stderr)
+        sys.exit(1)
     
-    dst_fn = sys.argv[1]
-# To ensure the target module perceives sys.argv as if run directly,
-    # remove run_main.py's own path from the list.
-    # (为确保目标模块感知到的 sys.argv 与直接运行时一致，移除 run_main.py 自身的路径)
-    sys.argv.pop(0)
+    # Ensure project_root (current working directory) is in sys.path
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
 
-    # 2. Replace assert with a more user-friendly file type check (替换 assert，进行更友好的文件类型检查)
-    if not dst_fn.endswith(".py"):
-        print(f"Error: Target file '{dst_fn}' does not appear to be a Python file (.py). Please provide a .py file.", file=sys.stderr)
-        print(f"错误: 目标文件 '{dst_fn}' 看起来不是一个 Python 文件 (.py)。请输入一个 .py 文件。", file=sys.stderr) # Added Chinese error message
-        sys.exit(1)
-    module = dst_fn[:-3] # Remove the .py suffix (移除 .py 后缀)
-    module = module.replace("\\",".").replace("/",".")
-
-    code = f"from {module} import _main"
+    module_import_str = module_rel_path[:-3].replace(os.sep, ".")
+    code = f"from {module_import_str} import _main"
     # No try-except around exec to allow direct debugging of import-time errors in the target module
     # (不使用 try-except 包裹 exec，以便直接调试目标模块中导入时发生的错误)
-    exec(code,globals())
+    exec(code,globals())  # noqa: F821
     # No try-except around _main call to allow direct debugging of runtime errors in _main
     # (不使用 try-except 包裹 _main 调用，以便直接调试 _main 中发生的运行时错误)
     # Call the target module's _main function with arguments
-    # that appear after the target module's path in the (now modified) sys.argv.
-    # (使用（现已修改的）sys.argv 中目标模块路径之后的参数来调用目标模块的 _main 函数)
-    _main(*sys.argv[1:])
+    # that appear after the target module's path.
+    _main(*args_for_main)  # noqa: F821
+
+if __name__ == "__main__":
+    main()

@@ -5,6 +5,15 @@
 	"version": "0.2.0",
 	"configurations": [
         {
+            "name": "run_main",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "run_main",
+            "args": ["${file}"],
+            "console": "integratedTerminal"
+            // "justMyCode": true
+        },
+        {
             "name": "_main",
             "type": "debugpy",
             "request": "launch",

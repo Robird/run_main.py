@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+# backend-path = ["."]
+
+[project]
+name = "run-main"
+version = "0.1.0"
+description = "Run _main() in .py File for Enhanced Debugging."
+readme = "README.md"
+authors = [
+    { name = "Robird", email = "RobirdLiu@Gmail.com" },
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License", 
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+keywords = ["python", "debug", "runner", "module", "vscode"]
+requires-python = ">=3.7"
+
+# 本项目无运行时依赖
+# dependencies = []
+
+[project.optional-dependencies]
+dev = [
+"pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Robird/run_main.py"
+Repository = "https://github.com/Robird/run_main.py"
+
+[tool.setuptools]
+py-modules = ["run_main"]
+
+# 定义命令行脚本
+[project.scripts]
+run-main = "run_main:main" # "run-main" 是命令名, "run_main" 是模块名 (run_main.py), "main" 是函数名
+
+[tool.pytest.ini_options]
+testpaths = [
+"tests",
+]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+# addopts = "--cov=run_main --cov-report=html" # 可选：如果你想集成代码覆盖率
