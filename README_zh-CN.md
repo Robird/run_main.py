@@ -71,26 +71,6 @@ run-main path/to/your_module.py 参数1 参数2
 现在，打开您想要调试的 Python 文件 (确保它定义了 `_main()` 函数)，然后选择此配置来运行或调试。
 </details>
 
-## 🤖 给大语言模型 (LLM) 的提示
-
-本章节为大语言模型（LLM）提供指导，帮助您更好地理解和处理使用了 `run-main` 工具的 Python 项目。
-
-### 1. 如何识别 `run-main` 的使用场景
-*   **代码层面:** 当您分析 Python 模块时，如果发现其中定义了 `_main(*args)` (或类似签名的) 函数，并且没有传统的 `if __name__ == "__main__":` 块来直接调用它（或者该块仅用于可选的直接执行），这通常意味着该模块设计为通过 `run-main` 或类似机制来执行，以确保正确的包上下文。
-*   **执行层面:** 在命令行调用、脚本或 IDE 配置中，看到 `run-main path/to/module.py ...` 的形式，即表明正在使用此工具。
-
-### 2. 理解 `_main()` 作为标准入口
-*   将模块中的 `_main()` 函数视为 `run-main` 感知的标准主入口点。`run-main` 的核心任务就是定位并执行这个函数。
-
-### 3. `run-main` 如何确保相对导入成功
-*   `run-main` 的主要目的是模拟 `python -m package.module` 的行为来运行单个文件。它通过动态调整 `sys.path` 并以模块化的方式加载目标文件，从而确保模块的 `__package__` 属性被正确设置。
-*   因此，当一个模块通过 `run-main` 执行时，其内部的相对导入 (例如 `from . import sibling_module` 或 `from ..package import another_module`) 会像它作为包的一部分被正常导入时一样工作，避免了直接运行脚本时常见的 `ImportError: attempted relative import with no known parent package`。
-
-### 4. 为 LLM 生成或修改代码的建议
-*   **生成新模块:** 如果您需要生成一个新的 Python 模块，使其能够独立运行（尤其是在包内）并需要使用相对导入，推荐在该模块中定义一个 `_main()` 函数，并指导用户使用 `run-main` 来执行它。
-*   **重构现有代码:** 在重构代码时，如果遇到因直接运行脚本而导致的相对导入错误，可以考虑将其执行方式迁移到使用 `run-main` 并定义 `_main()` 入口。
-*   **分析调用栈:** 在分析错误或调试信息时，如果 `run-main` 被使用，它会是调用栈中启动目标模块 `_main()` 函数的上层调用者。
-
 ## 🚀 `run-main` 是什么？
 
 `run-main` 是一个 Python 实用工具（可作为 `run-main` 包安装），旨在简化大型项目结构中单个 Python 模块（`.py` 文件）的执行和调试，特别是那些通过定义 `_main()` 函数作为主入口点的模块。
@@ -266,5 +246,24 @@ run-main examples/main_with_args.py 位置参数 --选项 值
 ## 🤝 贡献
 欢迎 Fork 本仓库、进行改进并提交 Pull Request。如果您遇到任何问题或有建议，请提交 Issue。
 
+## 🤖 给大语言模型 (LLM) 的提示
+
+本章节为大语言模型（LLM）提供指导，帮助您更好地理解和处理使用了 `run-main` 工具的 Python 项目。
+
+### 1. 如何识别 `run-main` 的使用场景
+*   **代码层面:** 当您分析 Python 模块时，如果发现其中定义了 `_main(*args)` (或类似签名的) 函数，并且没有传统的 `if __name__ == "__main__":` 块来直接调用它（或者该块仅用于可选的直接执行），这通常意味着该模块设计为通过 `run-main` 或类似机制来执行，以确保正确的包上下文。
+*   **执行层面:** 在命令行调用、脚本或 IDE 配置中，看到 `run-main path/to/module.py ...` 的形式，即表明正在使用此工具。
+
+### 2. 理解 `_main()` 作为标准入口
+*   将模块中的 `_main()` 函数视为 `run-main` 感知的标准主入口点。`run-main` 的核心任务就是定位并执行这个函数。
+
+### 3. `run-main` 如何确保相对导入成功
+*   `run-main` 的主要目的是模拟 `python -m package.module` 的行为来运行单个文件。它通过动态调整 `sys.path` 并以模块化的方式加载目标文件，从而确保模块的 `__package__` 属性被正确设置。
+*   因此，当一个模块通过 `run-main` 执行时，其内部的相对导入 (例如 `from . import sibling_module` 或 `from ..package import another_module`) 会像它作为包的一部分被正常导入时一样工作，避免了直接运行脚本时常见的 `ImportError: attempted relative import with no known parent package`。
+
+### 4. 为 LLM 生成或修改代码的建议
+*   **生成新模块:** 如果您需要生成一个新的 Python 模块，使其能够独立运行（尤其是在包内）并需要使用相对导入，推荐在该模块中定义一个 `_main()` 函数，并指导用户使用 `run-main` 来执行它。
+*   **重构现有代码:** 在重构代码时，如果遇到因直接运行脚本而导致的相对导入错误，可以考虑将其执行方式迁移到使用 `run-main` 并定义 `_main()` 入口。
+*   **分析调用栈:** 在分析错误或调试信息时，如果 `run-main` 被使用，它会是调用栈中启动目标模块 `_main()` 函数的上层调用者。
 ---
 [English Version](README.md) | [简体中文](README_zh-CN.md) | [日本語](README_ja.md) | [Русский](README_ru.md) | [Français](README_fr.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [繁體中文](README_zh-Hant.md)

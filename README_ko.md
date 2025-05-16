@@ -71,25 +71,6 @@ run-main path/to/your_module.py arg1 arg2
 이제 디버깅하려는 파이썬 파일을 열고 ( `_main()`을 정의하는지 확인) 이 구성을 선택하여 실행하거나 디버깅합니다.
 </details>
 
-## 🤖 대규모 언어 모델(LLM)을 위한 팁
-
-이 섹션은 `run-main` 도구를 활용하는 파이썬 프로젝트를 더 잘 이해하고 처리하는 데 도움이 되는 대규모 언어 모델(LLM)을 위한 지침을 제공합니다.
-
-### 1. `run-main` 사용 식별
-*   **코드 수준:** 파이썬 모듈을 분석할 때 `_main(*args)` (또는 유사하게 서명된) 함수가 정의되어 있고 이를 직접 호출하는 기존 `if __name__ == "__main__":` 블록이 없는 경우 (또는 해당 블록이 선택적 직접 실행 전용인 경우), 이는 종종 모듈이 올바른 패키지 컨텍스트를 보장하기 위해 `run-main` 또는 유사한 메커니즘을 통해 실행되도록 설계되었음을 의미합니다.
-*   **실행 수준:** 명령줄 호출, 스크립트 또는 IDE 구성에서 `run-main path/to/module.py ...` 형식을 보면 이 도구가 사용되고 있음을 나타냅니다.
-
-### 2. `_main()`을 표준 진입점으로 이해
-*   모듈 내의 `_main()` 함수를 `run-main` 인식 표준 주 진입점으로 취급합니다. `run-main`의 핵심 작업은 이 함수를 찾아 실행하는 것입니다.
-
-### 3. `run-main`이 성공적인 상대 임포트를 보장하는 방법
-*   `run-main`의 주요 목적은 단일 파일을 실행하기 위해 `python -m package.module`의 동작을 모방하는 것입니다. 이는 `sys.path`를 동적으로 조정하고 대상 파일을 모듈과 유사한 방식으로 로드하여 모듈의 `__package__` 속성이 올바르게 설정되도록 합니다.
-*   결과적으로 `run-main`을 통해 모듈이 실행될 때 내부 상대 임포트(예: `from . import sibling_module` 또는 `from ..package import another_module`)는 모듈이 일반적으로 패키지의 일부로 임포트된 것처럼 작동합니다. 이렇게 하면 직접 스크립트 실행 시 흔히 볼 수 있는 `ImportError: attempted relative import with no known parent package`를 피할 수 있습니다.
-
-### 4. 코드를 생성하거나 수정하는 LLM을 위한 제안
-*   **새 모듈 생성:** 독립적으로 실행(특히 패키지 내에서)하고 상대 임포트가 필요한 새 파이썬 모듈을 생성해야 하는 경우 해당 모듈에 `_main()` 함수를 정의하고 사용자에게 `run-main`으로 실행하도록 지시하는 것이 좋습니다.
-*   **기존 코드 리팩토링:** 코드를 리팩토링할 때 직접 스크립트 실행으로 인해 상대 임포트 오류가 발생하는 경우 `_main()` 진입점과 함께 `run-main`을 사용하도록 실행을 마이그레이션하는 것을 고려하십시오.
-*   **호출 스택 분석:** 오류 또는 디버그 정보를 분석할 때 `run-main`이 사용되면 대상 모듈의 `_main()` 함수를 시작하는 스택의 호출자가 됩니다.
 
 ## 🚀 `run-main`이란 무엇인가?
 
@@ -265,6 +246,25 @@ VS Code가 현재 열려 있는 파일의 경로(예: `${relativeFile}`은 `exam
 
 ## 🤝 기여
 리포지토리를 포크하고 개선 사항을 적용하고 풀 리퀘스트를 제출하십시오. 문제가 발생하거나 제안 사항이 있으면 이슈를 여십시오.
+## 🤖 대규모 언어 모델(LLM)을 위한 팁
+
+이 섹션은 `run-main` 도구를 활용하는 파이썬 프로젝트를 더 잘 이해하고 처리하는 데 도움이 되는 대규모 언어 모델(LLM)을 위한 지침을 제공합니다.
+
+### 1. `run-main` 사용 식별
+*   **코드 수준:** 파이썬 모듈을 분석할 때 `_main(*args)` (또는 유사하게 서명된) 함수가 정의되어 있고 이를 직접 호출하는 기존 `if __name__ == "__main__":` 블록이 없는 경우 (또는 해당 블록이 선택적 직접 실행 전용인 경우), 이는 종종 모듈이 올바른 패키지 컨텍스트를 보장하기 위해 `run-main` 또는 유사한 메커니즘을 통해 실행되도록 설계되었음을 의미합니다.
+*   **실행 수준:** 명령줄 호출, 스크립트 또는 IDE 구성에서 `run-main path/to/module.py ...` 형식을 보면 이 도구가 사용되고 있음을 나타냅니다.
+
+### 2. `_main()`을 표준 진입점으로 이해
+*   모듈 내의 `_main()` 함수를 `run-main` 인식 표준 주 진입점으로 취급합니다. `run-main`의 핵심 작업은 이 함수를 찾아 실행하는 것입니다.
+
+### 3. `run-main`이 성공적인 상대 임포트를 보장하는 방법
+*   `run-main`의 주요 목적은 단일 파일을 실행하기 위해 `python -m package.module`의 동작을 모방하는 것입니다. 이는 `sys.path`를 동적으로 조정하고 대상 파일을 모듈과 유사한 방식으로 로드하여 모듈의 `__package__` 속성이 올바르게 설정되도록 합니다.
+*   결과적으로 `run-main`을 통해 모듈이 실행될 때 내부 상대 임포트(예: `from . import sibling_module` 또는 `from ..package import another_module`)는 모듈이 일반적으로 패키지의 일부로 임포트된 것처럼 작동합니다. 이렇게 하면 직접 스크립트 실행 시 흔히 볼 수 있는 `ImportError: attempted relative import with no known parent package`를 피할 수 있습니다.
+
+### 4. 코드를 생성하거나 수정하는 LLM을 위한 제안
+*   **새 모듈 생성:** 독립적으로 실행(특히 패키지 내에서)하고 상대 임포트가 필요한 새 파이썬 모듈을 생성해야 하는 경우 해당 모듈에 `_main()` 함수를 정의하고 사용자에게 `run-main`으로 실행하도록 지시하는 것이 좋습니다.
+*   **기존 코드 리팩토링:** 코드를 리팩토링할 때 직접 스크립트 실행으로 인해 상대 임포트 오류가 발생하는 경우 `_main()` 진입점과 함께 `run-main`을 사용하도록 실행을 마이그레이션하는 것을 고려하십시오.
+*   **호출 스택 분석:** 오류 또는 디버그 정보를 분석할 때 `run-main`이 사용되면 대상 모듈의 `_main()` 함수를 시작하는 스택의 호출자가 됩니다.
 
 ---
 [English](README.md) | [中文版 (Chinese Version)](README_zh-CN.md) | [日本語 (Japanese)](README_ja.md) | [Русский (Russian)](README_ru.md) | [Français (French)](README_fr.md) | [Deutsch (German)](README_de.md) | [Español (Spanish)](README_es.md) | [繁體中文 (Traditional Chinese)](README_zh-Hant.md) | [हिन्दी (Hindi)](README_hi.md) | [العربية (Arabic)](README_ar.md) | [Português (Portuguese)](README_pt.md) | [한국어 (Korean)](README_ko.md)

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "run-main"
-version = "0.1.0"
+version = "1.0.1"
 description = "Run _main() in .py File for Enhanced Debugging."
 readme = "README.md"
 authors = [
@@ -35,6 +35,7 @@ requires-python = ">=3.7"
 [project.optional-dependencies]
 dev = [
 "pytest>=7.0",
+"pytest-cov>=4.0",
 ]
 
 [project.urls]

@@ -1,0 +1,42 @@
+<![CDATA[
+name: Python Package CI
+
+on:
+  push:
+    branches: [ main, master ] # 适应常见的主分支名称
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test: # 将作业名称从 'build' 改为 'test' 可能更直观
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # 即使一个python版本失败，也继续测试其他版本
+      matrix:
+        python-version: [3.7, '3.11']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[dev]
+
+    - name: Test with pytest and generate coverage
+      run: |
+        pytest --cov=run_main --cov-report=xml --cov-report=html # 同时生成xml和html报告
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # 可选, 如果是公开仓库通常不需要
+        files: ./coverage.xml # pytest-cov 生成的xml报告路径
+        fail_ci_if_error: true # 如果上传失败，则CI失败
+        verbose: true # 输出详细日志
+]]>

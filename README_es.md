@@ -71,26 +71,6 @@ Abre el archivo Python que contiene `_main()` y presiona F5 para iniciar la depu
 Ahora, abre el archivo Python que deseas depurar (asegúrate de que defina `_main()`), y selecciona esta configuración para ejecutar o depurar.
 </details>
 
-## 🤖 Consejos para Modelos de Lenguaje Grandes (LLM)
-
-Esta sección proporciona orientación para Modelos de Lenguaje Grandes (LLM) para ayudarte a comprender y procesar mejor los proyectos de Python que utilizan la herramienta `run-main`.
-
-### 1. Identificar el uso de `run-main`
-*   **Nivel de código:** Al analizar un módulo de Python, si encuentras una función `_main(*args)` (o con una firma similar) definida, y no hay un bloque tradicional `if __name__ == "__main__":` que la llame directamente (o si ese bloque es solo para ejecución directa opcional), a menudo implica que el módulo está diseñado para ejecutarse mediante `run-main` o un mecanismo similar para garantizar el contexto de paquete correcto.
-*   **Nivel de ejecución:** En llamadas de línea de comandos, scripts o configuraciones de IDE, ver la forma `run-main path/to/module.py ...` indica que se está utilizando esta herramienta.
-
-### 2. Entender `_main()` como el punto de entrada estándar
-*   Trata la función `_main()` dentro de un módulo como el punto de entrada principal estándar compatible con `run-main`. La tarea principal de `run-main` es localizar y ejecutar esta función.
-
-### 3. Cómo `run-main` asegura importaciones relativas exitosas
-*   El propósito principal de `run-main` es imitar el comportamiento de `python -m package.module` para ejecutar archivos individuales. Lo logra ajustando dinámicamente `sys.path` y cargando el archivo de destino de manera similar a un módulo, asegurando que el atributo `__package__` del módulo se establezca correctamente.
-*   En consecuencia, cuando un módulo se ejecuta mediante `run-main`, sus importaciones relativas internas (por ejemplo, `from . import sibling_module` o `from ..package import another_module`) funcionan como lo harían si el módulo se importara normalmente como parte de un paquete. Esto evita el error común `ImportError: attempted relative import with no known parent package` que se observa con la ejecución directa de scripts.
-
-### 4. Sugerencias para LLM que generan o modifican código
-*   **Generar nuevos módulos:** Si necesitas generar un nuevo módulo de Python destinado a ejecutarse de forma independiente (especialmente dentro de un paquete) y requiere importaciones relativas, recomienda definir una función `_main()` en ese módulo e instruye a los usuarios para que lo ejecuten con `run-main`.
-*   **Refactorizar código existente:** Al refactorizar código, si encuentras errores de importación relativa debido a la ejecución directa de scripts, considera migrar su ejecución para usar `run-main` con un punto de entrada `_main()`.
-*   **Analizar pilas de llamadas:** Al analizar errores o información de depuración, si se utiliza `run-main`, será el llamador en la pila que lanza la función `_main()` del módulo de destino.
-
 ## 🚀 ¿Qué es `run-main`?
 
 `run-main` es una utilidad de Python (instalable como el paquete `run-main`) diseñada para simplificar la ejecución y depuración de módulos individuales de Python (archivos `.py`) dentro de una estructura de proyecto más grande, especialmente aquellos destinados a ejecutarse como punto de entrada principal mediante la definición de una función `_main()`.
@@ -266,5 +246,24 @@ Hasta entonces, `run-main` proporciona una solución práctica.
 ## 🤝 Contribuir
 Siéntete libre de bifurcar el repositorio, realizar mejoras y enviar pull requests. Si encuentras algún problema o tienes sugerencias, abre un issue.
 
+## 🤖 Consejos para Modelos de Lenguaje Grandes (LLM)
+
+Esta sección proporciona orientación para Modelos de Lenguaje Grandes (LLM) para ayudarte a comprender y procesar mejor los proyectos de Python que utilizan la herramienta `run-main`.
+
+### 1. Identificar el uso de `run-main`
+*   **Nivel de código:** Al analizar un módulo de Python, si encuentras una función `_main(*args)` (o con una firma similar) definida, y no hay un bloque tradicional `if __name__ == "__main__":` que la llame directamente (o si ese bloque es solo para ejecución directa opcional), a menudo implica que el módulo está diseñado para ejecutarse mediante `run-main` o un mecanismo similar para garantizar el contexto de paquete correcto.
+*   **Nivel de ejecución:** En llamadas de línea de comandos, scripts o configuraciones de IDE, ver la forma `run-main path/to/module.py ...` indica que se está utilizando esta herramienta.
+
+### 2. Entender `_main()` como el punto de entrada estándar
+*   Trata la función `_main()` dentro de un módulo como el punto de entrada principal estándar compatible con `run-main`. La tarea principal de `run-main` es localizar y ejecutar esta función.
+
+### 3. Cómo `run-main` asegura importaciones relativas exitosas
+*   El propósito principal de `run-main` es imitar el comportamiento de `python -m package.module` para ejecutar archivos individuales. Lo logra ajustando dinámicamente `sys.path` y cargando el archivo de destino de manera similar a un módulo, asegurando que el atributo `__package__` del módulo se establezca correctamente.
+*   En consecuencia, cuando un módulo se ejecuta mediante `run-main`, sus importaciones relativas internas (por ejemplo, `from . import sibling_module` o `from ..package import another_module`) funcionan como lo harían si el módulo se importara normalmente como parte de un paquete. Esto evita el error común `ImportError: attempted relative import with no known parent package` que se observa con la ejecución directa de scripts.
+
+### 4. Sugerencias para LLM que generan o modifican código
+*   **Generar nuevos módulos:** Si necesitas generar un nuevo módulo de Python destinado a ejecutarse de forma independiente (especialmente dentro de un paquete) y requiere importaciones relativas, recomienda definir una función `_main()` en ese módulo e instruye a los usuarios para que lo ejecuten con `run-main`.
+*   **Refactorizar código existente:** Al refactorizar código, si encuentras errores de importación relativa debido a la ejecución directa de scripts, considera migrar su ejecución para usar `run-main` con un punto de entrada `_main()`.
+*   **Analizar pilas de llamadas:** Al analizar errores o información de depuración, si se utiliza `run-main`, será el llamador en la pila que lanza la función `_main()` del módulo de destino.
 ---
 [English (Versión en inglés)](README.md) | [中文版 (Versión en chino)](README_zh-CN.md) | [日本語 (Versión en japonés)](README_ja.md) | [Русский (Versión en ruso)](README_ru.md) | [Français (Versión en francés)](README_fr.md) | [Deutsch (Versión en alemán)](README_de.md) | [Español (Versión en español)](README_es.md) | [繁體中文 (Versión en chino tradicional)](README_zh-Hant.md) | [हिन्दी (Versión en hindi)](README_hi.md) | [العربية (Versión en árabe)](README_ar.md) | [Português (Versión en portugués)](README_pt.md) | [한국어 (Versión en coreano)](README_ko.md)
